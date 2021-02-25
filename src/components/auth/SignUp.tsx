@@ -6,20 +6,31 @@ import Input from "../Input/Input";
 
 import { SignUpData } from "../../types/index";
 import { useAuthentiate } from "../../hooks/index";
+import { useModalContext } from "../../state/modalContext";
 
 const SignUp: React.FC = () => {
+  const { setModalType } = useModalContext();
+
   const { error, loading, signup } = useAuthentiate();
 
   const { register, errors, handleSubmit } = useForm<SignUpData>();
 
-  const handleSignup = handleSubmit((data) => signup(data));
+  const handleSignup = handleSubmit(async (data) => {
+    const response = await signup(data);
+
+    // console.log("res -->", response);
+
+    if (response) setModalType("close");
+  });
 
   return (
     <>
-      <div className="backdrop"></div>
+      <div className="backdrop" onClick={() => setModalType("close")}></div>
 
       <div className="modal modal--auth-form">
-        <div className="modal-close">&times;</div>
+        <div className="modal-close" onClick={() => setModalType("close")}>
+          &times;
+        </div>
         <h3 className="header--center paragraph--orange">Sign up to Awesome</h3>
 
         <form onSubmit={handleSignup} className="form">

@@ -1,0 +1,86 @@
+import React, {
+  createContext,
+  useReducer,
+  Dispatch,
+  useContext,
+  useEffect,
+} from "react";
+import { auth } from "../firebase/config";
+import { AuthUser } from "../types";
+
+type FETCH_AUTH_USER = {
+  type: "FETCH_AUTH_USER";
+  payload: AuthUser | null;
+};
+
+type AuthActions = FETCH_AUTH_USER;
+
+type AuthState = {
+  authUser: AuthUser | null;
+};
+type AuthDispatch = Dispatch<AuthActions>;
+
+const AuthStateContext = createContext<AuthState | undefined>(undefined);
+
+const AuthDispatchContext = createContext<AuthDispatch | undefined>(undefined);
+
+// Action creators
+const fetchAuthUser = (user: AuthUser | null): FETCH_AUTH_USER => ({
+  type: "FETCH_AUTH_USER",
+  payload: user,
+});
+
+// reducer function
+const authReducer = (state: AuthState, action: AuthActions): AuthState => {
+  switch (action.type) {
+    case "FETCH_AUTH_USER":
+      return {
+        ...state,
+        authUser: action.payload,
+      };
+
+    default:
+      return state;
+  }
+};
+
+const initialState: AuthState = {
+  authUser: null,
+};
+
+const AuthContextProvider: React.FC = ({ children }) => {
+  const [authState, authDispatch] = useReducer(authReducer, initialState);
+
+  // listen to auth state change in firebase authentication
+  useEffect(() => {
+    const subscribe = auth.onAuthStateChanged((user) => {
+      if (user) authDispatch(fetchAuthUser(user));
+      else authDispatch(fetchAuthUser(null));
+    });
+    return () => subscribe();
+  }, []);
+
+  return (
+    <AuthStateContext.Provider value={authState}>
+      <AuthDispatchContext.Provider value={authDispatch}>
+        {children}
+      </AuthDispatchContext.Provider>
+    </AuthStateContext.Provider>
+  );
+};
+
+export default AuthContextProvider;
+
+export const useAuthContext = () => {
+  const authState = useContext(AuthStateContext);
+  const authDispatch = useContext(AuthDispatchContext);
+
+  if (authState === undefined || authDispatch === undefined) {
+    throw new Error("useAuthContext must be used within a AuthStateContext");
+  }
+
+  return {
+    authState,
+    authDispatch,
+  };
+};

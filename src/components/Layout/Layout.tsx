@@ -1,14 +1,16 @@
 import React from "react";
 import Nav from "../Nav/Nav";
-import SignUp from "../auth/SignUp";
+
+import { useModalContext } from "../../state/modalContext";
 
 const Layout: React.FC = ({ children }) => {
+  const { modal } = useModalContext();
   return (
     <div>
       <Nav />
       <div className="page">{children}</div>
 
-      <SignUp />
+      {modal && modal}
     </div>
   );
 };
