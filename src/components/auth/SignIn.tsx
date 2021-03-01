@@ -9,15 +9,17 @@ import { useAuthentiate } from "../../hooks/index";
 import { useModalContext } from "../../state/modalContext";
 import SocialMediaForm from "./SocialMediaForm";
 
-const SignUp: React.FC = () => {
+const SignIn: React.FC = () => {
   const { setModalType } = useModalContext();
 
-  const { error, loading, signup, socialLogin } = useAuthentiate();
+  const { error, loading, signin, socialLogin } = useAuthentiate();
 
-  const { register, errors, handleSubmit } = useForm<SignUpData>();
+  const { register, errors, handleSubmit } = useForm<
+    Omit<SignUpData, "username">
+  >();
 
-  const handleSignup = handleSubmit(async (data) => {
-    const response = await signup(data);
+  const handleSignIn = handleSubmit(async (data) => {
+    const response = await signin(data);
 
     if (response) setModalType("close");
   });
@@ -30,33 +32,17 @@ const SignUp: React.FC = () => {
         <div className="modal-close" onClick={() => setModalType("close")}>
           &times;
         </div>
-        <h3 className="header--center paragraph--orange">Sign up to Awesome</h3>
+        <h3 className="header--center paragraph--orange">Sign in to Awesome</h3>
 
         <SocialMediaForm socialLogin={socialLogin} loading={loading} />
 
         <hr />
+
         <p className="paragraph--center paragraph--focus paragraph--small">
           Or Sign up with an email
         </p>
 
-        <form onSubmit={handleSignup} className="form">
-          <Input
-            label="Username"
-            name="username"
-            error={errors.username?.message}
-            placeholder="Your username"
-            ref={register({
-              required: "Username is required.",
-              minLength: {
-                value: 3,
-                message: "Username must be at least 3 characters.",
-              },
-              maxLength: {
-                value: 20,
-                message: "Username cannot exceed 20 characters.",
-              },
-            })}
-          />
+        <form onSubmit={handleSignIn} className="form">
           <Input
             label="Email"
             name="email"
@@ -64,10 +50,10 @@ const SignUp: React.FC = () => {
             placeholder="Your email"
             ref={register({
               required: "Email is required.",
-              pattern: {
-                value: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                message: "Email is incorrect",
-              },
+              // pattern: {
+              //   value: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+              //   message: "Email is incorrect",
+              // },
             })}
           />
 
@@ -79,14 +65,14 @@ const SignUp: React.FC = () => {
             placeholder="Your password"
             ref={register({
               required: "Password is required.",
-              minLength: {
-                value: 12,
-                message: "Password must be at least 12 characters.",
-              },
-              maxLength: {
-                value: 60,
-                message: "Password cannot exceed 20 characters.",
-              },
+              // minLength: {
+              //   value: 12,
+              //   message: "Password must be at least 12 characters.",
+              // },
+              // maxLength: {
+              //   value: 60,
+              //   message: "Password cannot exceed 20 characters.",
+              // },
             })}
           />
 
@@ -96,18 +82,27 @@ const SignUp: React.FC = () => {
           {error && <p className="paragraph paragraph--error  ">{error}</p>}
         </form>
         <p className="paragraph paragraph--focus paragraph--small">
-          Already have an account yet?{" "}
+          Don't have an account yet?{" "}
           <span
             className="paragraph--orange paragraph--link"
-            onClick={() => setModalType("signin")}
+            onClick={() => setModalType("signup")}
           >
-            Sign in
+            Sign up
           </span>{" "}
           instead
+        </p>
+        <p className="paragraph paragraph--focus paragraph--small">
+          Forgot your password? Reset it{" "}
+          <span
+            className="paragraph--orange paragraph--link"
+            onClick={() => setModalType("reset_password")}
+          >
+            here
+          </span>
         </p>
       </div>
     </>
   );
 };
 
-export default SignUp;
+export default SignIn;

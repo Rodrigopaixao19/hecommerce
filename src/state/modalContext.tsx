@@ -9,6 +9,8 @@ import React, {
 } from "react";
 
 import Signup from "../components/auth/SignUp";
+import SignIn from "../components/auth/SignIn";
+import ResetPassword from "../components/auth/ResetPassword";
 
 type ModalType = "close" | "signup" | "signin" | "reset_password";
 type Modals = {
@@ -31,8 +33,8 @@ const ModalDispatchContext = createContext<ModalDispatch | undefined>(
 const modals: Modals = {
   close: null,
   signup: <Signup />,
-  signin: null,
-  reset_password: null,
+  signin: <SignIn />,
+  reset_password: <ResetPassword />,
 };
 
 const ModalContextProvider: React.FC = ({ children }) => {

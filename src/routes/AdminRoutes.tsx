@@ -7,11 +7,7 @@ import ManageProducts from "../pages/ManageProducts";
 import ManageUsers from "../pages/ManageUsers";
 import PageNotFound from "../pages/PageNotFound";
 
-interface Props {}
-
-const AdminRoutes: React.FC = (props: Props) => {
-  const {} = props;
-
+const AdminRoutes: React.FC = () => {
   return (
     <Switch>
       <Route path="/admin/manage-products" component={ManageProducts} />

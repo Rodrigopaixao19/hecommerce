@@ -1,10 +1,15 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { useModalContext } from "../../state/modalContext";
 import Button from "../Button/Button";
 
+import { useAuthContext } from "../../state/authContext";
+import LoggedOutNav from "./LoggedOutNav";
+import LoggedInNav from "./LoggedInNav";
+
 const Nav: React.FC = () => {
-  const { modal, setModalType } = useModalContext();
+  const {
+    authState: { authUser },
+  } = useAuthContext();
 
   return (
     <header className="head">
@@ -21,19 +26,7 @@ const Nav: React.FC = () => {
           <Button className="btn--search">Search</Button>
         </div>
         <nav className="head__navbar">
-          <ul className="navbar">
-            <div className="navbar__list">
-              <div className="navbar__profile">
-                <Button className="btn--sign">Sign in</Button>
-                <Button
-                  className="btn--sign"
-                  onClick={() => setModalType("signup")}
-                >
-                  Sign up
-                </Button>
-              </div>
-            </div>
-          </ul>
+          {!authUser ? <LoggedOutNav /> : <LoggedInNav />}
         </nav>
 
         {/* <NavLink to="/" className="list-link">
