@@ -1,6 +1,10 @@
 import React from "react";
 
-import { useAuthContext, openUserDropdown } from "../../state/authContext";
+import {
+  useAuthContext,
+  openUserDropdown,
+  signoutRedirect,
+} from "../../state/authContext";
 import Button from "../Button/Button";
 import AdminDropDown from "./AdminDropDown";
 import ClientDropDown from "./ClientDropDown";
@@ -32,7 +36,13 @@ const UserDropDown: React.FC = () => {
         {/* <AdminDropDown/> */}
 
         <div className="sidebar__section">
-          <Button className="btn--sidebar--signout" onClick={() => signout()}>
+          <Button
+            className="btn--sidebar--signout"
+            onClick={() => {
+              signout();
+              authDispatch(signoutRedirect(true));
+            }}
+          >
             Sign out
           </Button>
         </div>

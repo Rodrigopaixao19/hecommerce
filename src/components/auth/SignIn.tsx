@@ -8,6 +8,7 @@ import { SignUpData } from "../../types/index";
 import { useAuthentiate } from "../../hooks/index";
 import { useModalContext } from "../../state/modalContext";
 import SocialMediaForm from "./SocialMediaForm";
+import { useHistory } from "react-router-dom";
 
 const SignIn: React.FC = () => {
   const { setModalType } = useModalContext();
@@ -18,6 +19,8 @@ const SignIn: React.FC = () => {
     Omit<SignUpData, "username">
   >();
 
+  const history = useHistory();
+
   const handleSignIn = handleSubmit(async (data) => {
     const response = await signin(data);
 
@@ -26,10 +29,22 @@ const SignIn: React.FC = () => {
 
   return (
     <>
-      <div className="backdrop" onClick={() => setModalType("close")}></div>
+      <div
+        className="backdrop"
+        onClick={() => {
+          history.replace("/", undefined);
+          setModalType("close");
+        }}
+      ></div>
 
       <div className="modal modal--auth-form">
-        <div className="modal-close" onClick={() => setModalType("close")}>
+        <div
+          className="modal-close"
+          onClick={() => {
+            history.replace("/", undefined);
+            setModalType("close");
+          }}
+        >
           &times;
         </div>
         <h3 className="header--center paragraph--orange">Sign in to Awesome</h3>

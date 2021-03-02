@@ -23,16 +23,25 @@ type FETCH_USER_INFO = {
   type: "FETCH_USER_INFO";
   payload: UserInfo | null;
 };
+type SIGNOUT_REDIRECT = {
+  type: "SIGNOUT_REDIRECT";
+  payload: boolean;
+};
 //**  Actions **//
 
 //**  Action types **//
-type AuthActions = FETCH_AUTH_USER | OPEN_USER_DROPDOWN | FETCH_USER_INFO;
+type AuthActions =
+  | FETCH_AUTH_USER
+  | OPEN_USER_DROPDOWN
+  | FETCH_USER_INFO
+  | SIGNOUT_REDIRECT;
 //**  Action types **//
 
 type AuthState = {
   authUser: AuthUser | null;
   isUserDropdownOpen: boolean;
   userInfo: UserInfo | null;
+  signoutRedirect: boolean;
 };
 
 type AuthDispatch = Dispatch<AuthActions>;
@@ -56,6 +65,11 @@ export const fetchUserInfo = (userInfo: UserInfo | null): FETCH_USER_INFO => ({
   payload: userInfo,
 });
 
+export const signoutRedirect = (redirect: boolean): SIGNOUT_REDIRECT => ({
+  type: "SIGNOUT_REDIRECT",
+  payload: redirect,
+});
+
 //**  action creator **//
 
 // reducer function
@@ -76,6 +90,11 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
         ...state,
         userInfo: action.payload,
       };
+    case "SIGNOUT_REDIRECT":
+      return {
+        ...state,
+        signoutRedirect: action.payload,
+      };
 
     default:
       return state;
@@ -87,6 +106,7 @@ const initialState: AuthState = {
   authUser: null,
   isUserDropdownOpen: false,
   userInfo: null,
+  signoutRedirect: false,
 };
 //**  initial state **//
 
