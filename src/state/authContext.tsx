@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { snapshotToUserInfo, usersRef } from "../firebase";
 import { auth } from "../firebase/config";
-import { AuthUser, UserInfo } from "../types";
+import { AuthUser, Role, UserInfo } from "../types";
 
 //**  Actions **//
 type FETCH_AUTH_USER = {
@@ -27,6 +27,14 @@ type SIGNOUT_REDIRECT = {
   type: "SIGNOUT_REDIRECT";
   payload: boolean;
 };
+type SET_USER_ROLE = {
+  type: "SET_USER_ROLE";
+  payload: Role | null;
+};
+type FINISH_AUTH_CHECK = {
+  type: "FINISH_AUTH_CHECK";
+  payload: boolean;
+};
 //**  Actions **//
 
 //**  Action types **//
@@ -34,7 +42,9 @@ type AuthActions =
   | FETCH_AUTH_USER
   | OPEN_USER_DROPDOWN
   | FETCH_USER_INFO
-  | SIGNOUT_REDIRECT;
+  | SIGNOUT_REDIRECT
+  | SET_USER_ROLE
+  | FINISH_AUTH_CHECK;
 //**  Action types **//
 
 type AuthState = {
@@ -42,6 +52,8 @@ type AuthState = {
   isUserDropdownOpen: boolean;
   userInfo: UserInfo | null;
   signoutRedirect: boolean;
+  userRole: Role | null;
+  authChecked: boolean;
 };
 
 type AuthDispatch = Dispatch<AuthActions>;
@@ -70,6 +82,16 @@ export const signoutRedirect = (redirect: boolean): SIGNOUT_REDIRECT => ({
   payload: redirect,
 });
 
+export const setUserRole = (role: Role | null): SET_USER_ROLE => ({
+  type: "SET_USER_ROLE",
+  payload: role,
+});
+
+export const finishAuthCheck = (checked: boolean): FINISH_AUTH_CHECK => ({
+  type: "FINISH_AUTH_CHECK",
+  payload: checked,
+});
+
 //**  action creator **//
 
 // reducer function
@@ -95,6 +117,17 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
         ...state,
         signoutRedirect: action.payload,
       };
+    case "SET_USER_ROLE":
+      return {
+        ...state,
+        userRole: action.payload,
+      };
+
+    case "FINISH_AUTH_CHECK":
+      return {
+        ...state,
+        authChecked: action.payload,
+      };
 
     default:
       return state;
@@ -107,6 +140,8 @@ const initialState: AuthState = {
   isUserDropdownOpen: false,
   userInfo: null,
   signoutRedirect: false,
+  userRole: null,
+  authChecked: false,
 };
 //**  initial state **//
 
@@ -116,19 +151,32 @@ const AuthContextProvider: React.FC = ({ children }) => {
   // listen to auth state change in firebase authentication
   useEffect(() => {
     const subscribe = auth.onAuthStateChanged((user) => {
-      if (user) authDispatch(fetchAuthUser(user));
-      else authDispatch(fetchAuthUser(null));
+      if (user) {
+        user
+          .getIdTokenResult()
+          .then((result) => {
+            const role = result.claims.role as Role;
+            authDispatch(setUserRole(role));
+          })
+
+          .catch(() => authDispatch(setUserRole(null)));
+        authDispatch(fetchAuthUser(user));
+      } else {
+        authDispatch(fetchAuthUser(null));
+        authDispatch(setUserRole(null));
+      }
+      authDispatch(finishAuthCheck(true));
     });
     return () => subscribe();
   }, []);
 
   // listen to users collection in firestore
   useEffect(() => {
-    if (!authState.authUser) return;
+    if (!authState.authUser) return authDispatch(fetchUserInfo(null));
 
     const unsubscribe = usersRef.doc(authState.authUser.uid).onSnapshot({
       next: (doc) => {
-        if (!doc.exists) return;
+        if (!doc.exists) return authDispatch(fetchUserInfo(null));
 
         const userInfo = snapshotToUserInfo(doc);
         authDispatch(fetchUserInfo(userInfo));

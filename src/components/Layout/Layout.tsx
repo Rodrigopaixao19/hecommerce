@@ -7,6 +7,7 @@ import UserDropDown from "../Sidebar/UserDropDown";
 
 import { useAuthContext, openUserDropdown } from "../../state/authContext";
 import { useLocation } from "react-router-dom";
+import ViewContextProvider from "../../state/viewContext";
 
 const Layout: React.FC = ({ children }) => {
   const {
@@ -25,8 +26,11 @@ const Layout: React.FC = ({ children }) => {
   return (
     <div>
       {/* <Sidebar /> */}
-      <Nav />
-      {isUserDropdownOpen && <UserDropDown />}
+
+      <ViewContextProvider>
+        <Nav />
+        {isUserDropdownOpen && <UserDropDown />}
+      </ViewContextProvider>
       <div className="page">{children}</div>
 
       {modal && modal}

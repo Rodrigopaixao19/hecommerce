@@ -5,7 +5,7 @@ const ClientDropDown: React.FC = () => {
   return (
     <div className="sidebar__section sidebar__section--nav">
       <li className="list">
-        <NavLink to="/product" className="list-link">
+        <NavLink to="/products" className="list-link">
           Products
         </NavLink>
       </li>

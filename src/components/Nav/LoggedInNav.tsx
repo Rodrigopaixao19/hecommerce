@@ -2,23 +2,32 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { useAuthContext, openUserDropdown } from "../../state/authContext";
+import { useViewContext } from "../../state/viewContext";
+import { isClient } from "../../helpers";
 
 const LoggedInNav: React.FC = () => {
-  const { authDispatch } = useAuthContext();
+  const {
+    authDispatch,
+    authState: { userRole },
+  } = useAuthContext();
+  const { viewMode } = useViewContext();
   return (
     <ul className="navbar">
-      <div className="navbar__list">
-        <li className="list list--cart">
-          <NavLink to="/buy/my-cart">
-            <FontAwesomeIcon
-              icon={["fas", "cart-arrow-down"]}
-              color="white"
-              size="lg"
-            />
-          </NavLink>
-          <div className="cart-qty">0</div>
-        </li>
+      <div className="navbar__lists">
+        {(viewMode === "client" || isClient(userRole)) && (
+          <li className="list list--cart">
+            <NavLink to="/buy/my-cart">
+              <FontAwesomeIcon
+                icon={["fas", "cart-arrow-down"]}
+                color="white"
+                size="lg"
+              />
+            </NavLink>
+            <div className="cart-qty">0</div>
+          </li>
+        )}
       </div>
 
       <div className="navbar__profile">
@@ -27,7 +36,7 @@ const LoggedInNav: React.FC = () => {
             icon={["fas", "user-circle"]}
             color="white"
             size="2x"
-            onMouseOver={() => authDispatch(openUserDropdown(true))}
+            onClick={() => authDispatch(openUserDropdown(true))}
           />
         </div>
       </div>

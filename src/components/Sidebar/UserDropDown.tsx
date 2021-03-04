@@ -9,21 +9,22 @@ import Button from "../Button/Button";
 import AdminDropDown from "./AdminDropDown";
 import ClientDropDown from "./ClientDropDown";
 import { useAuthentiate } from "../../hooks/useAuthenticate";
+import { isAdmin, isClient } from "../../helpers";
+import { useViewContext } from "../../state/viewContext";
 
 const UserDropDown: React.FC = () => {
   const {
-    authState: { authUser },
+    authState: { authUser, userRole },
     authDispatch,
   } = useAuthContext();
+
+  const { viewMode } = useViewContext();
 
   const { signout } = useAuthentiate();
 
   return (
     <div className="page page--sidebar">
-      <div
-        className="sidebar sidebar-show"
-        onMouseLeave={() => authDispatch(openUserDropdown(false))}
-      >
+      <div className="sidebar sidebar-show">
         <div className="sidebar__section sidebar__section--profile">
           <h3 className="header--center header--sidebar">
             {authUser?.displayName}
@@ -31,9 +32,10 @@ const UserDropDown: React.FC = () => {
           <h3 className="header--center header--sidebar">{authUser?.email}</h3>
         </div>
 
-        <ClientDropDown />
+        {isAdmin(userRole) && <AdminDropDown />}
 
-        {/* <AdminDropDown/> */}
+        {(isClient(userRole) ||
+          (isAdmin(userRole) && viewMode === "client")) && <ClientDropDown />}
 
         <div className="sidebar__section">
           <Button

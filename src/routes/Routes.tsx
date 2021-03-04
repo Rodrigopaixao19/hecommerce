@@ -11,18 +11,25 @@ import Products from "../pages/Products";
 import AdminRoutes from "./AdminRoutes";
 import BuyRoutes from "./BuyRoutes";
 import OrderRoutes from "./OrderRoutes";
+import PrivateRoutes from "./PrivateRoutes";
 
 const Routes: React.FC = () => {
   return (
     <Switch>
       <Route path="/buy">
-        <BuyRoutes />
+        <PrivateRoutes>
+          <BuyRoutes />
+        </PrivateRoutes>
       </Route>
       <Route path="/orders">
-        <OrderRoutes />
+        <PrivateRoutes>
+          <OrderRoutes />
+        </PrivateRoutes>
       </Route>
       <Route path="/admin">
-        <AdminRoutes />
+        <PrivateRoutes>
+          <AdminRoutes />
+        </PrivateRoutes>
       </Route>
       <Route path="/products/:productId" component={ProductDetail} />
       <Route path="/products" component={Products} />
