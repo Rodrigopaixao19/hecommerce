@@ -32,3 +32,20 @@ export type UserInfo = {
   stripeCustomerId?: string;
   updatedAt?: firebase.firestore.Timestamp;
 };
+
+export type ProductCategory = "Clothing" | "Shoes" | "Watches" | "Accessories";
+
+export type Product = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  imageRef: string;
+  imageFileName: string;
+  price: number;
+  category: ProductCategory;
+  inventory: number;
+  creator: string;
+  createdAt: firebase.firestore.Timestamp;
+  updated?: firebase.firestore.Timestamp;
+};

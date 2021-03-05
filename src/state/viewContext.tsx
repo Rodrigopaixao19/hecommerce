@@ -28,7 +28,6 @@ const ViewContextProvider: React.FC = ({ children }) => {
       <ViewDispatchContext.Provider value={setViewMode}>
         {children}
       </ViewDispatchContext.Provider>
-      ;
     </ViewStateContext.Provider>
   );
 };

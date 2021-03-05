@@ -16,7 +16,7 @@ const Input = forwardRef(
           {label}
         </label>
         <input type={type} className="input" {...props} ref={ref} />
-        {error && <p className="paragraph--error--small">{error}</p>}
+        {error && <p className="paragraph--error-small">{error}</p>}
       </div>
     );
   }
