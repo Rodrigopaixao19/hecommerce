@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import Nav from "../Nav/Nav";
 
 import { useModalContext } from "../../state/modalContext";
-import Sidebar from "../Sidebar/Sidebar";
+// import Sidebar from "../Sidebar/Sidebar";
 import UserDropDown from "../Sidebar/UserDropDown";
 
 import { useAuthContext, openUserDropdown } from "../../state/authContext";

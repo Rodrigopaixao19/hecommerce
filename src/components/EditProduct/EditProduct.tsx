@@ -1,7 +1,10 @@
-import React, { ChangeEvent, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { useAuthContext } from "../../state/authContext";
+import { useAddProduct } from "../../hooks/useAddProduct";
 import Button from "../Button/Button";
+
 import Input from "../Input/Input";
 import { Product } from "../../types/index";
 import { categories } from "../../helpers/index";
@@ -13,8 +16,19 @@ interface IEditProductProps {
 }
 
 const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
-  const [selectedFile, setSelectedFile] = useState<File>();
-  const { register, handleSubmit, errors } = useForm<
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const {
+    authState: { authUser },
+  } = useAuthContext();
+  const {
+    addNewProduct,
+    error,
+    loading,
+    addProductFinished,
+    setUploadProgression,
+    uploadProgression,
+  } = useAddProduct();
+  const { register, handleSubmit, errors, reset } = useForm<
     Pick<
       Product,
       | "title"
@@ -27,6 +41,14 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
   >();
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (addProductFinished) {
+      reset();
+      setSelectedFile(null);
+      setUploadProgression(0);
+    }
+  }, [addProductFinished, reset, setUploadProgression, setSelectedFile]);
 
   const handleOpenUploadBox = () => {
     if (inputRef?.current) inputRef.current.click();
@@ -48,10 +70,10 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
   };
 
   const handleAddProdut = handleSubmit((data) => {
-    console.log(data);
-  });
+    if (!selectedFile || !authUser) return;
 
-  console.log(selectedFile);
+    return addNewProduct(selectedFile, data, authUser?.uid);
+  });
 
   return (
     <>
@@ -114,18 +136,28 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
               Image
             </label>
             <div className="form__input-file-upload">
-              <input
-                type="text"
-                className="input"
-                name="imageFileName"
-                readOnly
-                style={{ width: "70%", cursor: "pointer" }}
-                onClick={handleOpenUploadBox}
-                value={selectedFile ? selectedFile.name : ""}
-                ref={register({
-                  required: "Product image is required to register a product",
-                })}
-              />
+              {uploadProgression ? (
+                <div style={{ width: "70%" }}>
+                  <input
+                    type="text"
+                    className="upload-progression"
+                    style={{ width: `${uploadProgression}%` }}
+                  />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  className="input"
+                  name="imageFileName"
+                  readOnly
+                  style={{ width: "70%", cursor: "pointer" }}
+                  onClick={handleOpenUploadBox}
+                  value={selectedFile ? selectedFile.name : ""}
+                  ref={register({
+                    required: "Product image is required to register a product",
+                  })}
+                />
+              )}
 
               <Button
                 width="30%"
@@ -198,10 +230,13 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
             className="btn--orange"
             width="100%"
             style={{ marginTop: "1rem" }}
+            loading={loading}
+            disabled={loading}
           >
             Submit
           </Button>
         </form>
+        {error && <p className="paragraph paragraph--error">{error}</p>}
       </div>
     </>
   );

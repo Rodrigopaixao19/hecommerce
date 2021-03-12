@@ -16,7 +16,7 @@ const Nav: React.FC = () => {
       <div className="head__section">
         <div className="head__logo">
           <NavLink to="/">
-            <h2 className="header header--logo">Ecommerce Shop</h2>
+            <h2 className="header header--logo">Hestyle Shop</h2>
           </NavLink>
         </div>
         <div className="head__search">

@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import Button from "../components/Button/Button";
 import EditProduct from "../components/EditProduct/EditProduct";
 
-const ManageProducts: React.FC = () => {
+interface IManageProps {}
+
+const ManageProducts: React.FC<IManageProps> = () => {
   const [openProductForm, setOpenProductForm] = useState(false);
   return (
     <div className="page--manage-products">

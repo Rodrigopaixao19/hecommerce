@@ -10,13 +10,17 @@ import PageNotFound from "../pages/PageNotFound";
 import { Role } from "../types";
 
 const AdminRoutes: React.FC = (props) => {
-  const { userRole } = props as { userRole: Role | null };
+  const { userRole } = props as {
+    userRole: Role | null;
+  };
 
   if (!isAdmin(userRole)) return <Redirect to="buy/my-cart" />;
 
   return (
     <Switch>
-      <Route path="/admin/manage-products" component={ManageProducts} />
+      <Route path="/admin/manage-products">
+        <ManageProducts />
+      </Route>
       <Route path="/admin/manage-orders/:id" component={ManageOrderDetail} />
       <Route path="/admin/manage-orders" component={ManageOrders} />
       <Route path="/admin/manage-users" component={ManageUsers} />

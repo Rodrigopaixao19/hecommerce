@@ -2,7 +2,7 @@ import React from "react";
 import Button from "../Button/Button";
 
 import { Provider } from "../../types/index";
-import { useAuthentiate } from "../../hooks/index";
+// import { useAuthentiate } from "../../hooks/index";
 import { useModalContext } from "../../state/modalContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { firebase } from "../../firebase/config";
