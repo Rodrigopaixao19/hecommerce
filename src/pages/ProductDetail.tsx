@@ -2,23 +2,31 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Button from "../components/Button/Button";
+import Spinner from "../components/Spinner/Spinner";
+import { useProductContext } from "../state/productContext";
 
-import { products, Product } from "../data/products";
+import { Product } from "../types/index";
 import PageNotFound from "./PageNotFound";
 
 interface Props {}
 
 const ProductDetail: React.FC<Props> = () => {
+  const {
+    productState: { products, loading },
+  } = useProductContext();
+
   const params = useParams() as { productId: string };
 
   const [product, setProduct] = useState<Product | undefined>();
 
   useEffect(() => {
-    const prod = products.find((item) => item.id === params.productId);
+    const prod = products.All.find((item) => item.id === params.productId);
 
     if (prod) setProduct(prod);
     else setProduct(undefined);
-  }, [params]);
+  }, [params, products.All]);
+
+  if (loading) return <Spinner color="grey" width={50} height={50} />;
 
   if (!product) return <PageNotFound />;
 

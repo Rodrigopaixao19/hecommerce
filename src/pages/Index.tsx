@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import ProductItem from "../components/Products/ProductItem";
-import { products } from "../data/products";
+import Spinner from "../components/Spinner/Spinner";
+
 import { useAuthContext } from "../state/authContext";
 import { useModalContext } from "../state/modalContext";
+import { useProductContext } from "../state/productContext";
 
 interface Props {}
 
@@ -15,6 +17,10 @@ const Index: React.FC<Props> = () => {
   const {
     authState: { authUser, signoutRedirect },
   } = useAuthContext();
+
+  const {
+    productState: { products, loading },
+  } = useProductContext();
 
   const { setModalType } = useModalContext();
 
@@ -31,10 +37,15 @@ const Index: React.FC<Props> = () => {
     }
   }, [setModalType, authUser, state, history, signoutRedirect]);
 
+  if (loading) return <Spinner color="grey" width={50} height={50} />;
+
+  if (!loading && products.All.length === 0)
+    return <h2 className="header--center">No products registered</h2>;
+
   return (
     <div className="page--products">
       <div className="products">
-        {products.map((product) => (
+        {products.All.map((product) => (
           <ProductItem key={product.id} product={product} />
         ))}
       </div>

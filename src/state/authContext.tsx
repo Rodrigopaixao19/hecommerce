@@ -5,7 +5,7 @@ import React, {
   useContext,
   useEffect,
 } from "react";
-import { snapshotToUserInfo, usersRef } from "../firebase";
+import { snapshotToDoc, usersRef } from "../firebase";
 import { auth } from "../firebase/config";
 import { AuthUser, Role, UserInfo } from "../types";
 
@@ -178,7 +178,7 @@ const AuthContextProvider: React.FC = ({ children }) => {
       next: (doc) => {
         if (!doc.exists) return authDispatch(fetchUserInfo(null));
 
-        const userInfo = snapshotToUserInfo(doc);
+        const userInfo = snapshotToDoc<UserInfo>(doc);
         authDispatch(fetchUserInfo(userInfo));
       },
       error: () => authDispatch(fetchUserInfo(null)),

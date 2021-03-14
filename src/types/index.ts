@@ -34,6 +34,7 @@ export type UserInfo = {
 };
 
 export type ProductCategory = "Clothing" | "Shoes" | "Watches" | "Accessories";
+export type ProductTab = "All" | ProductCategory;
 
 export type Product = {
   id: string;

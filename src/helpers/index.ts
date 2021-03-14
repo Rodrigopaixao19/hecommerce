@@ -11,3 +11,8 @@ export const categories: ProductCategory[] = [
   "Watches",
   "Accessories",
 ];
+
+export const formatAmount = (amout: number) =>
+  amout.toLocaleString("en", {
+    minimumFractionDigits: 2,
+  });

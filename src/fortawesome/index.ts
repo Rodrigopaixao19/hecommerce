@@ -4,6 +4,8 @@ import {
   faMinus,
   faCartArrowDown,
   faUserCircle,
+  faEdit,
+  faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons";
@@ -14,5 +16,7 @@ library.add(
   faCartArrowDown,
   faUserCircle,
   faFacebook,
-  faGoogle
+  faGoogle,
+  faEdit,
+  faTrashAlt
 );

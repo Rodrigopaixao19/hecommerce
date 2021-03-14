@@ -2,7 +2,7 @@ import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { useAuthContext } from "../../state/authContext";
-import { useAddProduct } from "../../hooks/useAddProduct";
+import { useManageProduct } from "../../hooks/useManageProduct";
 import Button from "../Button/Button";
 
 import Input from "../Input/Input";
@@ -27,7 +27,8 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
     addProductFinished,
     setUploadProgression,
     uploadProgression,
-  } = useAddProduct();
+    uploadImageToStorage,
+  } = useManageProduct();
   const { register, handleSubmit, errors, reset } = useForm<
     Pick<
       Product,
@@ -72,7 +73,10 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
   const handleAddProdut = handleSubmit((data) => {
     if (!selectedFile || !authUser) return;
 
-    return addNewProduct(selectedFile, data, authUser?.uid);
+    return uploadImageToStorage(
+      selectedFile,
+      addNewProduct(data, authUser?.uid)
+    );
   });
 
   return (
