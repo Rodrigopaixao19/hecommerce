@@ -13,15 +13,21 @@ const fileType = ["image/png", "image/jpeg", "image/jpg"];
 
 interface IEditProductProps {
   setOpenProductForm: (open: boolean) => void;
+  productToEdit: Product | null;
 }
 
-const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
+const EditProduct: React.FC<IEditProductProps> = ({
+  setOpenProductForm,
+  productToEdit,
+}) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const {
     authState: { authUser },
   } = useAuthContext();
   const {
     addNewProduct,
+    editProduct,
+    editProductFinished,
     error,
     loading,
     addProductFinished,
@@ -79,6 +85,28 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
     );
   });
 
+  const handleEditProduct = handleSubmit((data) => {
+    if (!productToEdit || !authUser) return;
+
+    const {
+      title,
+      description,
+      price,
+      imageFileName,
+      category,
+      inventory,
+    } = productToEdit;
+
+    // check if product data has been changed
+    const isNotEdited =
+      title === data.title &&
+      description === data.description &&
+      +price === data.price &&
+      imageFileName === data.imageFileName &&
+      category === data.category &&
+      +inventory === data.inventory;
+  });
+
   return (
     <>
       <div className="backdrop" onClick={() => setOpenProductForm(false)}></div>
@@ -88,11 +116,15 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
         </div>
 
         <h2 className="header--center">Add a new product</h2>
-        <form className="form" onSubmit={handleAddProdut}>
+        <form
+          className="form"
+          onSubmit={productToEdit ? handleEditProduct : handleAddProdut}
+        >
           <Input
             label="Title"
             name="title"
             placeholder="Product Title"
+            defaultValue={productToEdit ? productToEdit.title : ""}
             ref={register({
               required: "Title is required.",
               minLength: {
@@ -107,6 +139,7 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
             label="Description"
             name="description"
             placeholder="Product Description"
+            defaultValue={productToEdit ? productToEdit.description : ""}
             ref={register({
               required: "Description is required.",
               minLength: {
@@ -125,6 +158,7 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
             type="number"
             name="price"
             placeholder="Product Price"
+            defaultValue={productToEdit ? productToEdit.price : ""}
             ref={register({
               required: "Price is required.",
               min: {
@@ -145,7 +179,12 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
                   <input
                     type="text"
                     className="upload-progression"
-                    style={{ width: `${uploadProgression}%` }}
+                    style={{
+                      width: `${uploadProgression}%`,
+                      color: "white",
+                      textAlign: "center",
+                    }}
+                    value={`${uploadProgression}%`}
                   />
                 </div>
               ) : (
@@ -156,7 +195,13 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
                   readOnly
                   style={{ width: "70%", cursor: "pointer" }}
                   onClick={handleOpenUploadBox}
-                  value={selectedFile ? selectedFile.name : ""}
+                  value={
+                    selectedFile
+                      ? selectedFile.name
+                      : productToEdit
+                      ? productToEdit.imageFileName
+                      : ""
+                  }
                   ref={register({
                     required: "Product image is required to register a product",
                   })}
@@ -196,6 +241,7 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
             <select
               name="category"
               className="input"
+              defaultValue={productToEdit ? productToEdit.category : undefined}
               ref={register({ required: "Product category is required" })}
               id=""
             >
@@ -219,6 +265,7 @@ const EditProduct: React.FC<IEditProductProps> = ({ setOpenProductForm }) => {
             name="inventory"
             type="number"
             placeholder="Product Inventory"
+            defaultValue={productToEdit ? productToEdit.inventory : ""}
             ref={register({
               required: "Inventory is required.",
               min: 0,

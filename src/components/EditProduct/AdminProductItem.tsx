@@ -5,9 +5,15 @@ import { Product } from "../../types";
 
 interface IProductItemProps {
   product: Product;
+  setOpenProductForm: (open: boolean) => void;
+  setProductToEdit: (product: Product | null) => void;
 }
 
-const AdminProductItem: React.FC<IProductItemProps> = ({ product }) => {
+const AdminProductItem: React.FC<IProductItemProps> = ({
+  product,
+  setOpenProductForm,
+  setProductToEdit,
+}) => {
   return (
     <tr>
       <td className="table-cell">{product.title}</td>
@@ -22,7 +28,13 @@ const AdminProductItem: React.FC<IProductItemProps> = ({ product }) => {
         {product.updated && product.updated.toDate().toDateString()}
       </td>
       <td className="table-cell">{product.inventory}</td>
-      <td className="table-cell table-cell--icon">
+      <td
+        className="table-cell table-cell--icon"
+        onClick={() => {
+          setOpenProductForm(true);
+          setProductToEdit(product);
+        }}
+      >
         <FontAwesomeIcon icon={["fas", "edit"]} size="1x" />
       </td>
       <td className="table-cell table-cell--icon">

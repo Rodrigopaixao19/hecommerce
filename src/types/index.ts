@@ -52,8 +52,9 @@ export type Product = {
 };
 
 // product type use to upload a document in firestore
-export type UploadProduct = Omit<Product, "id" | "createdAt"> & {
-  createdAt: firebase.firestore.FieldValue;
+export type UploadProduct = Omit<Product, "id" | "createdAt" | "updatedAt"> & {
+  createdAt?: firebase.firestore.FieldValue;
+  updatedAt?: firebase.firestore.FieldValue;
 };
 
 export type AddProductData = Pick<
