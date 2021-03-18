@@ -7,6 +7,10 @@ admin.initializeApp();
 
 const env = functions.config();
 
+const productsCollection = "products";
+const productsCountsCollection = "product-counts";
+const productCountsDocument = "counts";
+
 // product-counts --> counts --> {All: 0, Clothing: 3, Shoes: 2, Watched: 2, Accessories: 3}
 
 type ProductCategory = "Clothing" | "Shoes" | "Watches" | "Accessories";
@@ -67,7 +71,7 @@ export const onSignup = functions.https.onCall(async (data, context) => {
 });
 
 export const onProductCreated = functions.firestore
-  .document("products/{productId}")
+  .document(`${productsCollection}/{productId}`)
   .onCreate(async (snapshot, context) => {
     const product = snapshot.data() as Product;
 
@@ -76,8 +80,8 @@ export const onProductCreated = functions.firestore
     // query the product-count collection
     const countData = await admin
       .firestore()
-      .collection("product-counts")
-      .doc("counts")
+      .collection(productsCountsCollection)
+      .doc(productCountsDocument)
       .get();
 
     if (!countData.exists) {
@@ -111,7 +115,70 @@ export const onProductCreated = functions.firestore
     // update the count document in the product-counts collection
     return admin
       .firestore()
-      .collection("product-counts")
-      .doc("counts")
+      .collection(productsCountsCollection)
+      .doc(productCountsDocument)
+      .set(counts);
+  });
+
+export const onProductUpdated = functions.firestore
+  .document(`${productsCollection}/{productId}`)
+  .onUpdate(async (snapshot, context) => {
+    const beforeUpdateProduct = snapshot.before.data() as Product;
+    const afterUpdatedProduct = snapshot.after.data() as Product;
+
+    // check if the category has been changed if not changed return
+    if (beforeUpdateProduct.category === afterUpdatedProduct.category) return;
+
+    // category has been changed
+
+    const countsData = await admin
+      .firestore()
+      .collection(productsCountsCollection)
+      .doc(productCountsDocument)
+      .get();
+
+    if (!countsData.exists) return;
+
+    const counts = countsData.data() as Counts;
+
+    // updated counts object by removing one
+    counts[beforeUpdateProduct.category] =
+      counts[beforeUpdateProduct.category] - 1;
+
+    // finally updating by increasing by one
+    counts[afterUpdatedProduct.category] =
+      counts[afterUpdatedProduct.category] + 1;
+
+    // return
+    return admin
+      .firestore()
+      .collection(productsCountsCollection)
+      .doc(productCountsDocument)
+      .set(counts);
+  });
+export const onProductDeleted = functions.firestore
+  .document(`${productsCollection}/{productId}`)
+  .onDelete(async (snapshot, context) => {
+    const product = snapshot.data() as Product;
+
+    // query product counts/counts from firestore
+    const countsData = await admin
+      .firestore()
+      .collection(productsCountsCollection)
+      .doc(productCountsDocument)
+      .get();
+
+    if (!countsData.exists) return;
+
+    const counts = countsData.data() as Counts;
+    // finally updating by increasing by one
+    counts.All = counts.All - 1;
+    counts[product.category] = counts[product.category] - 1;
+
+    // return
+    return admin
+      .firestore()
+      .collection(productsCountsCollection)
+      .doc(productCountsDocument)
       .set(counts);
   });

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { createImageRef, productsRef } from "../firebase";
-import { AddProductData, UploadProduct } from "../types/index";
+import { AddProductData, UploadProduct, Product } from "../types/index";
 import { useAsyncCall } from "./useAsyncCall";
-import { firebase } from "../firebase/config";
+import { firebase, storageRef } from "../firebase/config";
 
 export const useManageProduct = () => {
   const [uploadProgression, setUploadProgression] = useState(0);
@@ -140,9 +140,37 @@ export const useManageProduct = () => {
         setLoading(false);
       });
   };
+
+  const deleteProduct = async (product: Product) => {
+    try {
+      setLoading(true);
+
+      // delete the product image from storage
+      const imageRef = storageRef.child(product.imageRef);
+      await imageRef.delete();
+
+      // delete document from product collection in firestore
+      await productsRef.doc(product.id).delete();
+
+      // delete the count item, if the count item is the deleted product
+
+      setLoading(false);
+
+      return true;
+    } catch (err) {
+      const { message } = err as { message: string };
+
+      setError(message);
+      setLoading(false);
+
+      return false;
+    }
+  };
+
   return {
     editProduct,
     uploadImageToStorage,
+    deleteProduct,
     addNewProduct,
     uploadProgression,
     setUploadProgression,

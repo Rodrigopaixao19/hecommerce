@@ -8,17 +8,20 @@ import Button from "../Button/Button";
 import Input from "../Input/Input";
 import { Product } from "../../types/index";
 import { categories } from "../../helpers/index";
+import { storageRef } from "../../firebase/config";
 
 const fileType = ["image/png", "image/jpeg", "image/jpg"];
 
 interface IEditProductProps {
   setOpenProductForm: (open: boolean) => void;
   productToEdit: Product | null;
+  setProductToEdit: (product: Product | null) => void;
 }
 
 const EditProduct: React.FC<IEditProductProps> = ({
   setOpenProductForm,
   productToEdit,
+  setProductToEdit,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const {
@@ -57,6 +60,24 @@ const EditProduct: React.FC<IEditProductProps> = ({
     }
   }, [addProductFinished, reset, setUploadProgression, setSelectedFile]);
 
+  useEffect(() => {
+    if (editProductFinished) {
+      reset();
+      setSelectedFile(null);
+      setUploadProgression(0);
+      setProductToEdit(null);
+      setOpenProductForm(false);
+    }
+  }, [
+    editProduct,
+    editProductFinished,
+    reset,
+    setUploadProgression,
+    setSelectedFile,
+    setProductToEdit,
+    setOpenProductForm,
+  ]);
+
   const handleOpenUploadBox = () => {
     if (inputRef?.current) inputRef.current.click();
   };
@@ -85,7 +106,7 @@ const EditProduct: React.FC<IEditProductProps> = ({
     );
   });
 
-  const handleEditProduct = handleSubmit((data) => {
+  const handleEditProduct = handleSubmit(async (data) => {
     if (!productToEdit || !authUser) return;
 
     const {
@@ -94,6 +115,8 @@ const EditProduct: React.FC<IEditProductProps> = ({
       price,
       imageFileName,
       category,
+      imageRef,
+      imageUrl,
       inventory,
     } = productToEdit;
 
@@ -105,17 +128,55 @@ const EditProduct: React.FC<IEditProductProps> = ({
       imageFileName === data.imageFileName &&
       category === data.category &&
       +inventory === data.inventory;
+
+    if (isNotEdited) return;
+
+    //something has been edited
+    if (imageFileName !== data.imageFileName) {
+      // if the image has changed
+      if (!selectedFile) return;
+
+      // delete old image
+      const oldImageRef = storageRef.child(imageRef);
+      await oldImageRef.delete();
+
+      return uploadImageToStorage(
+        selectedFile,
+        editProduct(productToEdit.id, data, authUser.uid)
+      );
+    } else {
+      // img not been changed
+      return editProduct(
+        productToEdit.id,
+        data,
+        authUser.uid
+      )(imageUrl, imageRef);
+    }
   });
 
   return (
     <>
-      <div className="backdrop" onClick={() => setOpenProductForm(false)}></div>
+      <div
+        className="backdrop"
+        onClick={() => {
+          setProductToEdit(null);
+          setOpenProductForm(false);
+        }}
+      ></div>
       <div className="modal modal--add-product">
-        <div className="modal-close" onClick={() => setOpenProductForm(false)}>
+        <div
+          className="modal-close"
+          onClick={() => {
+            setOpenProductForm(false);
+            setProductToEdit(null);
+          }}
+        >
           &times;
         </div>
 
-        <h2 className="header--center">Add a new product</h2>
+        <h2 className="header--center">
+          {productToEdit ? "Edit your product" : "Add a new product"}
+        </h2>
         <form
           className="form"
           onSubmit={productToEdit ? handleEditProduct : handleAddProdut}
