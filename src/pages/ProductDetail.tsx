@@ -3,6 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Button from "../components/Button/Button";
 import Spinner from "../components/Spinner/Spinner";
+import { formatAmount, isAdmin, isClient } from "../helpers";
+import { useAuthContext } from "../state/authContext";
+import { useModalContext } from "../state/modalContext";
 import { useProductContext } from "../state/productContext";
 
 import { Product } from "../types/index";
@@ -14,6 +17,11 @@ const ProductDetail: React.FC<Props> = () => {
   const {
     productState: { products, loading },
   } = useProductContext();
+
+  const {
+    authState: { authUser, userRole },
+  } = useAuthContext();
+  const { setModalType } = useModalContext();
 
   const params = useParams() as { productId: string };
 
@@ -48,13 +56,22 @@ const ProductDetail: React.FC<Props> = () => {
           <p className="paragraph">
             Price:{" "}
             <span className="paragraph--orange">
-              ${product.price.toFixed(2)}
+              ${formatAmount(product.price)}
             </span>
           </p>
         </div>
         <div className="product-detail__sub-section product-detail__sub-section--stock">
           <p className="paragraph">
-            Availability: <span className="paragraph--success">In Stock</span>
+            Availability:{" "}
+            <span
+              className={`paragraph--success ${
+                product.inventory === 0 ? "paragraph--error" : undefined
+              }`}
+            >
+              {product.inventory === 0
+                ? "Out of stock"
+                : `${product.inventory}`}
+            </span>
           </p>
         </div>
         <div className="product-detail__sub-section quantity-control">
@@ -69,7 +86,20 @@ const ProductDetail: React.FC<Props> = () => {
           </div>
         </div>
 
-        <Button>Add to Cart</Button>
+        <Button
+          disabled={product.inventory === 0}
+          onClick={() => {
+            if (!authUser) {
+              setModalType("signin");
+              return;
+            } else if (authUser && isAdmin(userRole)) {
+              alert("You are an admit, you can't proceed");
+              return;
+            }
+          }}
+        >
+          Add to Cart
+        </Button>
       </div>
     </div>
   );

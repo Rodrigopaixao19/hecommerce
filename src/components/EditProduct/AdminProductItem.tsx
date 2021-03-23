@@ -2,22 +2,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { formatAmount } from "../../helpers";
 import { Product } from "../../types";
-import { useManageProduct } from "../../hooks/useManageProduct";
-import Spinner from "../Spinner/Spinner";
 
 interface IProductItemProps {
   product: Product;
   setOpenProductForm: (open: boolean) => void;
   setProductToEdit: (product: Product | null) => void;
+  setOpenDialog: (open: boolean) => void;
+  setProductToDelete: (product: Product | null) => void;
 }
 
 const AdminProductItem: React.FC<IProductItemProps> = ({
   product,
   setOpenProductForm,
   setProductToEdit,
+  setOpenDialog,
+  setProductToDelete,
 }) => {
-  const { deleteProduct, loading } = useManageProduct();
-
   return (
     <tr>
       <td className="table-cell">{product.title}</td>
@@ -42,16 +42,15 @@ const AdminProductItem: React.FC<IProductItemProps> = ({
         <FontAwesomeIcon icon={["fas", "edit"]} size="1x" />
       </td>
       <td className="table-cell table-cell--icon">
-        {loading ? (
-          <Spinner color="grey" />
-        ) : (
-          <FontAwesomeIcon
-            icon={["fas", "trash-alt"]}
-            size="1x"
-            color="red"
-            onClick={() => deleteProduct(product)}
-          />
-        )}
+        <FontAwesomeIcon
+          icon={["fas", "trash-alt"]}
+          size="1x"
+          color="red"
+          onClick={() => {
+            setProductToDelete(product);
+            setOpenDialog(true);
+          }}
+        />
       </td>
     </tr>
   );
