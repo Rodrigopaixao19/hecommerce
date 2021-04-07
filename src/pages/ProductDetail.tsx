@@ -1,12 +1,16 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import Button from "../components/Button/Button";
 import Spinner from "../components/Spinner/Spinner";
 import { formatAmount, isAdmin, isClient } from "../helpers";
 import { useAuthContext } from "../state/authContext";
 import { useModalContext } from "../state/modalContext";
 import { useProductContext } from "../state/productContext";
+import { useManageCart } from "../hooks/useManageCart";
+import { useDialog } from "../hooks/useDialog";
+
+import ConfirmAddToCartDialogue from "../components/Dialogs/ConfirmAddToCartDialogue";
 
 import { Product } from "../types/index";
 import PageNotFound from "./PageNotFound";
@@ -15,15 +19,31 @@ interface Props {}
 
 const ProductDetail: React.FC<Props> = () => {
   const {
-    productState: { products, loading },
+    productState: { products, loading, error },
   } = useProductContext();
+
+  const [addedCartItem, setAddedCartItem] = useState<{
+    product: Product;
+    quantity: number;
+  } | null>(null);
 
   const {
     authState: { authUser, userRole },
   } = useAuthContext();
   const { setModalType } = useModalContext();
 
+  const {
+    addToCart,
+    error: addToCartError,
+    loading: addToCartLoading,
+  } = useManageCart();
+
+  const { openDialog, setOpenDialog } = useDialog();
+
+  const [quantity, setQuantity] = useState(0);
+
   const params = useParams() as { productId: string };
+  const history = useHistory();
 
   const [product, setProduct] = useState<Product | undefined>();
 
@@ -35,6 +55,8 @@ const ProductDetail: React.FC<Props> = () => {
   }, [params, products.All]);
 
   if (loading) return <Spinner color="grey" width={50} height={50} />;
+
+  if (loading && error) return <h2 className="header">{error}</h2>;
 
   if (!product) return <PageNotFound />;
 
@@ -64,43 +86,100 @@ const ProductDetail: React.FC<Props> = () => {
           <p className="paragraph">
             Availability:{" "}
             <span
-              className={`paragraph--success ${
+              className={`paragraph--orange ${
                 product.inventory === 0 ? "paragraph--error" : undefined
               }`}
             >
-              {product.inventory === 0
-                ? "Out of stock"
-                : `${product.inventory}`}
+              {product.inventory} pcs
             </span>
           </p>
         </div>
-        <div className="product-detail__sub-section quantity-control">
-          <div className="qty-action">
-            <FontAwesomeIcon icon={["fas", "minus"]} size="xs" color="grey" />
+
+        {product.inventory === 0 ? (
+          <p className="paragraph--error">Out of stock</p>
+        ) : (
+          <div className="product-detail__sub-section quantity-control">
+            <div
+              className="qty-action"
+              style={{ cursor: quantity === 1 ? "not-allowed" : undefined }}
+              onClick={() =>
+                setQuantity((prev) => {
+                  if (prev < 2) return prev;
+
+                  return prev - 1;
+                })
+              }
+            >
+              <FontAwesomeIcon icon={["fas", "minus"]} size="xs" color="grey" />
+            </div>
+            <div className="qty-action qty-action--qty">
+              <p className="paragraph">{quantity}</p>
+            </div>
+            <div
+              className="qty-action"
+              style={{
+                cursor:
+                  quantity === product.inventory ? "not-allowed" : undefined,
+              }}
+              onClick={() =>
+                setQuantity((prev) => {
+                  if (prev === product.inventory) return prev;
+
+                  return prev + 1;
+                })
+              }
+            >
+              <FontAwesomeIcon icon={["fas", "plus"]} size="xs" color="grey" />
+            </div>
           </div>
-          <div className="qty-action qty-action--qty">
-            <p className="paragraph">1</p>
-          </div>
-          <div className="qty-action">
-            <FontAwesomeIcon icon={["fas", "plus"]} size="xs" color="grey" />
-          </div>
-        </div>
+        )}
 
         <Button
-          disabled={product.inventory === 0}
-          onClick={() => {
+          loading={addToCartLoading}
+          disabled={product.inventory === 0 || addToCartLoading}
+          onClick={async () => {
             if (!authUser) {
               setModalType("signin");
               return;
             } else if (authUser && isAdmin(userRole)) {
               alert("You are an admit, you can't proceed");
               return;
+            } else if (authUser && isClient(userRole)) {
+              // add product to cart
+              const finished = await addToCart(
+                product.id,
+                quantity,
+                authUser.uid,
+                product.inventory
+              );
+
+              if (finished) {
+                setOpenDialog(true);
+                setAddedCartItem({ product, quantity });
+                setQuantity(1);
+              }
             }
           }}
         >
           Add to Cart
         </Button>
+        {addToCartError && <p className="paragraph--error">{addToCartError}</p>}
       </div>
+
+      {openDialog && addedCartItem && (
+        <ConfirmAddToCartDialogue
+          header="Added to cart"
+          cartItemData={addedCartItem}
+          goToCart={() => {
+            setOpenDialog(false);
+            history.push("/buy/my-cart");
+          }}
+          continueShopping={() => {
+            setOpenDialog(false);
+            history.push("/");
+          }}
+        />
+      )}
     </div>
   );
 };

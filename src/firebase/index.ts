@@ -7,6 +7,7 @@ import { UserInfo, Product } from "../types";
 export const usersRef = db.collection("users");
 export const productsRef = db.collection("products");
 export const productsCountsRef = db.collection("product-counts");
+export const cartRef = db.collection("cart");
 
 export const productImagesFolder = "products";
 
