@@ -14,6 +14,7 @@ import ConfirmAddToCartDialogue from "../components/Dialogs/ConfirmAddToCartDial
 
 import { Product } from "../types/index";
 import PageNotFound from "./PageNotFound";
+import { useCartContext } from "../state/cartContext";
 
 interface Props {}
 
@@ -22,6 +23,7 @@ const ProductDetail: React.FC<Props> = () => {
     productState: { products, loading, error },
   } = useProductContext();
 
+  const { cart } = useCartContext();
   const [addedCartItem, setAddedCartItem] = useState<{
     product: Product;
     quantity: number;
@@ -145,6 +147,23 @@ const ProductDetail: React.FC<Props> = () => {
               alert("You are an admit, you can't proceed");
               return;
             } else if (authUser && isClient(userRole)) {
+              // check if this item is already in the existing cart, and if it is, check  the cart quantity and the inventory
+
+              const foundItem = cart
+                ? cart.find((item) => item.product === product.id)
+                : undefined;
+
+              if (
+                foundItem &&
+                foundItem.quantity + quantity > product.inventory
+              ) {
+                const allowedQty = product.inventory - foundItem.quantity;
+                setQuantity(allowedQty === 0 ? 1 : allowedQty);
+                alert(
+                  `You already have "${foundItem.quantity} pcs" of this item in your cart, so maximum quantity allowed for this item is "${allowedQty} pcs".`
+                );
+                return;
+              }
               // add product to cart
               const finished = await addToCart(
                 product.id,

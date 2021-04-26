@@ -5,13 +5,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useAuthContext, openUserDropdown } from "../../state/authContext";
 import { useViewContext } from "../../state/viewContext";
-import { isClient } from "../../helpers";
+import { calculateCartQuantity, isClient } from "../../helpers";
+import { useCartContext } from "../../state/cartContext";
 
 const LoggedInNav: React.FC = () => {
   const {
     authDispatch,
     authState: { userRole },
   } = useAuthContext();
+
+  const { cart } = useCartContext();
   const { viewMode } = useViewContext();
   return (
     <ul className="navbar">
@@ -25,7 +28,9 @@ const LoggedInNav: React.FC = () => {
                 size="lg"
               />
             </NavLink>
-            <div className="cart-qty">0</div>
+            <div className="cart-qty">
+              {cart && calculateCartQuantity(cart)}
+            </div>
           </li>
         )}
       </div>

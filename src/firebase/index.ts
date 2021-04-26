@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { db, firebase, storageRef } from "./config";
 
-import { UserInfo, Product } from "../types";
+import { UserInfo, Product, cartItem } from "../types";
 
 export const usersRef = db.collection("users");
 export const productsRef = db.collection("products");
@@ -11,7 +11,7 @@ export const cartRef = db.collection("cart");
 
 export const productImagesFolder = "products";
 
-export const snapshotToDoc = <T extends UserInfo | Product>(
+export const snapshotToDoc = <T extends UserInfo | Product | cartItem>(
   doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>
 ) => {
   const docData = doc.data() as T;

@@ -6,12 +6,12 @@ import "firebase/firestore";
 import "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_apiKey,
-  authDomain: process.env.REACT_APP_authDomain,
-  projectId: process.env.REACT_APP_projectId,
-  storageBucket: process.env.REACT_APP_storageBucket,
-  messagingSenderId: process.env.REACT_APP_messagingSenderId,
-  appId: process.env.REACT_APP_appId,
+  apiKey: "AIzaSyDpRsqamOYIOdRkz56UjilFm7mvsS3H6PA",
+  authDomain: "ecommercestudy-e7e2e.firebaseapp.com",
+  projectId: "ecommercestudy-e7e2e",
+  storageBucket: "ecommercestudy-e7e2e.appspot.com",
+  messagingSenderId: "740643185749",
+  appId: "1:740643185749:web:8991ad850a44274548a0dc",
 };
 
 firebase.initializeApp(firebaseConfig);
